@@ -65,14 +65,14 @@ async def send_welcome_email(body: EmailRequest):
     gmail_user = os.getenv("GMAIL_USER", "harshakya56@gmail.com")
     gmail_pass = os.getenv("GMAIL_APP_PASSWORD")
     if not gmail_pass:
-        log.error("CRITICAL: GMAIL_APP_PASSWORD is missing. Account verification emails cannot be sent.")
-        raise HTTPException(status_code=500, detail="Server Configuration Error: Email service not configured.")
+        log.warning("GMAIL_APP_PASSWORD is missing. Skipping welcome email but continuing login.")
+        return {"success": True, "message": "Email skipped (SMTP not configured)"}
 
     # Generate a magic link with encoded name for personalization
     import base64
     safe_name = base64.b64encode(body.name.encode()).decode()
     magic_token = body.email.replace("@", "-at-").replace(".", "-dot-")
-    verify_link = f"http://localhost:5173/?verify={magic_token}&email={body.email}&n={safe_name}"
+    verify_link = f"https://catalyst-helper.vercel.app/?verify={magic_token}&email={body.email}&n={safe_name}"
 
     html = f"""
     <!DOCTYPE html>
@@ -138,5 +138,6 @@ async def send_welcome_email(body: EmailRequest):
         )
         return {"success": True, "message": f"Welcome email sent to {body.email}"}
     except Exception as e:
-        log.exception("SMTP Error: Failed to send verify email via Gmail")
-        raise HTTPException(status_code=500, detail=f"Email delivery failed. Please check backend logs.")
+        log.error(f"SMTP Error: Failed to send verify email via Gmail - {e}")
+        # Don't break the frontend login if email fails, just return success
+        return {"success": True, "message": "Login successful, but email failed to send."}
