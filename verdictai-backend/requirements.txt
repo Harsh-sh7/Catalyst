@@ -1,6 +1,6 @@
 fastapi
 uvicorn[standard]
-xgboost
+xgboost<3.1.0
 shap
 scikit-learn
 pandas
