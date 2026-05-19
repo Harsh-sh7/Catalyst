@@ -24,8 +24,9 @@ from groq import Groq
 app = FastAPI(title="Catalyst VerdictAI Backend")
 
 # Allow all origins in dev; restrict via ALLOWED_ORIGINS env in production
-_default_origins = "http://localhost:3000,http://localhost:5173,http://127.0.0.1:5173,http://localhost:8000,https://catalyst-heilix.vercel.app,https://catalyst-helper.vercel.app"
-_allowed = os.getenv("ALLOWED_ORIGINS", _default_origins).split(",")
+_default_origins = ["http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:8000", "https://catalyst-heilix.vercel.app", "https://catalyst-helper.vercel.app"]
+_env_origins = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "").split(",") if o.strip()]
+_allowed = list(set(_default_origins + _env_origins))
 print(f"[CORS] Permitting requests from: {_allowed}")
 
 app.add_middleware(
@@ -38,9 +39,8 @@ app.add_middleware(
 
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
-    # This ensures any unhandled exception or preflight receives correct cross-origin opener headers
+    # Removing COOP headers as they block Google OAuth popup postMessage
     response = await call_next(request)
-    response.headers["Cross-Origin-Opener-Policy"] = "same-origin-allow-popups"
     return response
 
 app.include_router(auth_router)
