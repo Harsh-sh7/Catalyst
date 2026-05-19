@@ -9,7 +9,7 @@ from data.loader import get_train_test_split
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "model.xgb")
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "model.json")
 
 _model = None
 _feature_names = None
