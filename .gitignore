@@ -29,3 +29,5 @@ test_api.py
 test_flip*.py
 test_model.py
 EVIDENCE_DOCS_TEXT.txt
+*.db
+verdictai-backend/__pycache__/
